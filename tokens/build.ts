@@ -33,7 +33,7 @@ fs.mkdirSync(path.join(outDir, 'web'), { recursive: true });
 const css = `:root {
 ${Object.entries(resolved)
   .filter(([, v]) => typeof v === 'string' && v.startsWith('#'))
-  .map(([k, v]) => `  --${k.replace(/./g, '-')}: ${v};`)
+  .map(([k, v]) => `  --${k.replace(/\./g, '-')}: ${v};`)
   .join('
 ')}
 }
