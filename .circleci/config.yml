@@ -14,8 +14,8 @@ executors:
 # Reusable commands
 # ---------------------------------------------------------------------------
 commands:
-  # Restore the npm global cache, then run npm ci, then save it.
-  # Keyed on the lock file so a clean install only runs when deps change.
+  # Restore the npm global cache, then run npm install, then save it.
+  # Keyed on package.json so the cache is invalidated when deps change.
   npm-ci-with-cache:
     parameters:
       node-version:
@@ -24,13 +24,13 @@ commands:
     steps:
       - restore_cache:
           keys:
-            - npm-v1-node<< parameters.node-version >>-{{ checksum "package-lock.json" }}
+            - npm-v1-node<< parameters.node-version >>-{{ checksum "package.json" }}
             - npm-v1-node<< parameters.node-version >>-
       - run:
-          name: Install dependencies (npm ci)
-          command: npm ci
+          name: Install dependencies (npm install)
+          command: npm install
       - save_cache:
-          key: npm-v1-node<< parameters.node-version >>-{{ checksum "package-lock.json" }}
+          key: npm-v1-node<< parameters.node-version >>-{{ checksum "package.json" }}
           paths:
             - ~/.npm
 
@@ -88,14 +88,13 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - npm-v1-node<< parameters.node-version >>-{{ checksum "package-lock.json" }}
+            - npm-v1-node<< parameters.node-version >>-{{ checksum "package.json" }}
             - npm-v1-node<< parameters.node-version >>-
       - run:
           name: Install dependencies
-          # Use npm install (not ci) to match webpack.yml which has no lock file guarantee
           command: npm install
       - save_cache:
-          key: npm-v1-node<< parameters.node-version >>-{{ checksum "package-lock.json" }}
+          key: npm-v1-node<< parameters.node-version >>-{{ checksum "package.json" }}
           paths:
             - ~/.npm
       - run:
