@@ -2,12 +2,15 @@
   "name": "ultra-pro-portfolio",
   "private": true,
   "version": "1.0.0",
+  "packageManager": "pnpm@9.15.0",
   "scripts": {
-    "tokens:build": "pnpm --filter tokens run build",
-    "web:dev": "pnpm --filter web run dev",
-    "web:build": "pnpm --filter web run build"
+    "install:all": "pnpm install",
+    "tokens:build": "pnpm --filter @ultra-pro/tokens build",
+    "tokens:check": "pnpm --filter @ultra-pro/tokens check",
+    "web:dev": "pnpm --filter @ultra-pro/web dev",
+    "web:build": "pnpm --filter @ultra-pro/web build"
   },
   "devDependencies": {
-    "typescript": "^5.8.0"
+    "typescript": "^5.8.3"
   }
 }
