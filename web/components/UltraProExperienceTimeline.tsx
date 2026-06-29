@@ -1,14 +1,8 @@
 import React from 'react';
-
-type Item = {
-  role: string;
-  company: string;
-  period: string;
-  description: string;
-};
+import type { UltraProExperienceItem } from '../models/ultraProModels';
 
 type Props = {
-  items: Item[];
+  items: UltraProExperienceItem[];
 };
 
 export function UltraProExperienceTimeline({ items }: Props) {

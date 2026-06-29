@@ -1,12 +1,8 @@
 import React from 'react';
-
-type Link = {
-  label: string;
-  href: string;
-};
+import type { UltraProSocialLink } from '../models/ultraProModels';
 
 type Props = {
-  links: Link[];
+  links: UltraProSocialLink[];
 };
 
 export function UltraProSocialLinks({ links }: Props) {

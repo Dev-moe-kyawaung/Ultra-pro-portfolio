@@ -9,39 +9,23 @@ import { UltraProContactForm } from '../components/UltraProContactForm';
 import { UltraProSocialLinks } from '../components/UltraProSocialLinks';
 import { UltraProFooter } from '../components/UltraProFooter';
 import { UltraProButton } from '../components/UltraProButton';
+import type {
+  UltraProExperienceItem,
+  UltraProProjectItem,
+  UltraProTestimonialItem,
+  UltraProSocialLink,
+} from '../models/ultraProModels';
 
-type Experience = {
-  role: string;
-  company: string;
-  period: string;
-  description: string;
-};
-
-type Project = {
-  title: string;
-  description: string;
-  tags: string[];
-};
-
-type Testimonial = {
-  quote: string;
-  author: string;
-  role: string;
-};
-
-type SocialLink = {
-  label: string;
-  href: string;
-};
+type NavItem = { label: string; href: string; active?: boolean };
 
 type Props = {
-  navItems: { label: string; href: string; active?: boolean }[];
+  navItems: NavItem[];
   heroTitle: string;
   heroSubtitle: string;
-  experiences: Experience[];
-  projects: Project[];
-  testimonials: Testimonial[];
-  socialLinks: SocialLink[];
+  experiences: UltraProExperienceItem[];
+  projects: UltraProProjectItem[];
+  testimonials: UltraProTestimonialItem[];
+  socialLinks: UltraProSocialLink[];
   onContactSubmit: (data: { name: string; email: string; message: string }) => void;
 };
 

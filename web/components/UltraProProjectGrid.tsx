@@ -1,13 +1,8 @@
 import React from 'react';
-
-type Project = {
-  title: string;
-  description: string;
-  tags: string[];
-};
+import type { UltraProProjectItem } from '../models/ultraProModels';
 
 type Props = {
-  projects: Project[];
+  projects: UltraProProjectItem[];
 };
 
 export function UltraProProjectGrid({ projects }: Props) {
@@ -21,9 +16,15 @@ export function UltraProProjectGrid({ projects }: Props) {
           <h3 className="text-title font-semibold text-[var(--color-text-primary)]">{project.title}</h3>
           <p className="mt-3 text-body text-[var(--color-text-secondary)]">{project.description}</p>
           {project.tags.length > 0 ? (
-            <p className="mt-4 text-sm text-[var(--color-text-secondary)]">
-              {project.tags.join(' • ')}
-            </p>
+            <ul aria-label="Tags" className="mt-4 flex flex-wrap gap-2">
+              {project.tags.map((tag) => (
+                <li key={tag}>
+                  <span className="inline-flex items-center rounded-full border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] px-3 py-1.5 text-sm font-medium text-[var(--color-text-primary)]">
+                    {tag}
+                  </span>
+                </li>
+              ))}
+            </ul>
           ) : null}
         </article>
       ))}

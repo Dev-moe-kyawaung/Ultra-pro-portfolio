@@ -1,13 +1,8 @@
 import React from 'react';
-
-type Item = {
-  quote: string;
-  author: string;
-  role: string;
-};
+import type { UltraProTestimonialItem } from '../models/ultraProModels';
 
 type Props = {
-  item: Item;
+  item: UltraProTestimonialItem;
 };
 
 export function UltraProTestimonial({ item }: Props) {
