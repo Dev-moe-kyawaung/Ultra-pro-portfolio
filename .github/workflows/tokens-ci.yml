@@ -1,0 +1,37 @@
+name: Tokens CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tokens:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build tokens
+        run: node tokens/build.ts
+
+      - name: Check parity
+        run: |
+          test -f generated/tokens.resolved.json
+          test -f generated/web/tokens.css
+          test -f generated/compose/UltraProTokens.kt
+          test -f generated/flutter/ultra_pro_tokens.dart
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: token-artifacts
+          path: generated/
