@@ -88,14 +88,14 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - npm-v1-node<< parameters.node-version >>-{{ checksum "package-lock.json" }}
+            - npm-v1-node<< parameters.node-version >>-{{ checksum "package.json" }}
             - npm-v1-node<< parameters.node-version >>-
       - run:
           name: Install dependencies
           # Use npm install (not ci) to match webpack.yml which has no lock file guarantee
           command: npm install
       - save_cache:
-          key: npm-v1-node<< parameters.node-version >>-{{ checksum "package-lock.json" }}
+          key: npm-v1-node<< parameters.node-version >>-{{ checksum "package.json" }}
           paths:
             - ~/.npm
       - run:
