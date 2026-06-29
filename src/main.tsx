@@ -1,21 +1,32 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { UltraProHome } from '../web/pages/UltraProHome';
+import {
+  navLabels,
+  heroTitle,
+  heroSubtitle,
+  experiences,
+  projects,
+  testimonials,
+  socialLinks,
+} from '../web/data/portfolioData';
+
+const navItems = navLabels.map((label, i) => ({
+  label,
+  href: `#${label.toLowerCase()}`,
+  active: i === 0,
+}));
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <UltraProHome
-      navItems={[
-        { label: 'Home', href: '#home', active: true },
-        { label: 'Projects', href: '#projects' },
-        { label: 'Contact', href: '#contact' },
-      ]}
-      heroTitle="Android Senior Developer"
-      heroSubtitle="I build premium Flutter, Kotlin, and web experiences."
-      experiences={[]}
-      projects={[]}
-      testimonials={[]}
-      socialLinks={[]}
+      navItems={navItems}
+      heroTitle={heroTitle}
+      heroSubtitle={heroSubtitle}
+      experiences={experiences}
+      projects={projects}
+      testimonials={testimonials}
+      socialLinks={socialLinks}
       onContactSubmit={() => {}}
     />
   </React.StrictMode>
