@@ -1,0 +1,278 @@
+version: 2.1
+
+# ---------------------------------------------------------------------------
+# Executors
+# ---------------------------------------------------------------------------
+executors:
+  node20:
+    docker:
+      - image: cimg/node:20.18
+    resource_class: medium
+    working_directory: ~/project
+
+# ---------------------------------------------------------------------------
+# Reusable commands
+# ---------------------------------------------------------------------------
+commands:
+  # Restore the npm global cache, then run npm ci, then save it.
+  # Keyed on the lock file so a clean install only runs when deps change.
+  npm-ci-with-cache:
+    parameters:
+      node-version:
+        type: string
+        default: "20"
+    steps:
+      - restore_cache:
+          keys:
+            - npm-v1-node<< parameters.node-version >>-{{ checksum "package-lock.json" }}
+            - npm-v1-node<< parameters.node-version >>-
+      - run:
+          name: Install dependencies (npm ci)
+          command: npm ci
+      - save_cache:
+          key: npm-v1-node<< parameters.node-version >>-{{ checksum "package-lock.json" }}
+          paths:
+            - ~/.npm
+
+  verify-token-artifacts:
+    steps:
+      - run:
+          name: Verify generated token artifacts exist
+          command: |
+            test -f generated/tokens.resolved.json
+            test -f generated/web/tokens.css
+            test -f generated/compose/UltraProTokens.kt
+            test -f generated/flutter/ultra_pro_tokens.dart
+
+# ---------------------------------------------------------------------------
+# Jobs
+# ---------------------------------------------------------------------------
+jobs:
+
+  # ── Install ───────────────────────────────────────────────────────────────
+  # Install npm dependencies once, cache them, and persist node_modules so
+  # downstream jobs can attach the workspace instead of reinstalling.
+  install:
+    executor: node20
+    steps:
+      - checkout
+      - npm-ci-with-cache
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - node_modules
+
+  # ── Test ──────────────────────────────────────────────────────────────────
+  test:
+    executor: node20
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Run tests
+          command: npm test
+
+  # ── Webpack build (parameterized by Node version) ─────────────────────────
+  # Mirrors the webpack.yml matrix strategy (Node 18 / 20 / 22).
+  # Each version gets its own npm cache key because native add-ons differ.
+  webpack-build:
+    parameters:
+      node-version:
+        type: string
+    docker:
+      - image: cimg/node:<< parameters.node-version >>
+    resource_class: medium
+    working_directory: ~/project
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - npm-v1-node<< parameters.node-version >>-{{ checksum "package-lock.json" }}
+            - npm-v1-node<< parameters.node-version >>-
+      - run:
+          name: Install dependencies
+          # Use npm install (not ci) to match webpack.yml which has no lock file guarantee
+          command: npm install
+      - save_cache:
+          key: npm-v1-node<< parameters.node-version >>-{{ checksum "package-lock.json" }}
+          paths:
+            - ~/.npm
+      - run:
+          name: Build with webpack
+          # Use the local binary to avoid npx network fetches on every run
+          command: ./node_modules/.bin/webpack
+
+  # ── Token build ───────────────────────────────────────────────────────────
+  # Runs the TypeScript token compiler and verifies all platform outputs.
+  # Generated files are persisted to workspace for use by the web build.
+  token-build:
+    executor: node20
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Build design tokens
+          command: node tokens/build.ts
+      - verify-token-artifacts
+      - store_artifacts:
+          path: generated
+          destination: token-artifacts
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - generated
+
+  # ── Web app build (Azure artifact) ────────────────────────────────────────
+  # Full production build; the resulting dist/ is persisted for the deploy job.
+  build-web:
+    executor: node20
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Build web application
+          command: npm run build --if-present
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - dist
+            - build
+      - store_artifacts:
+          path: dist
+          destination: web-dist
+
+  # ── Deploy to Azure Web App ───────────────────────────────────────────────
+  # Requires AZURE_WEBAPP_NAME and AZURE_PUBLISH_PROFILE env vars set in the
+  # CircleCI project or context.
+  deploy-azure:
+    executor: node20
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Install Azure CLI
+          command: |
+            curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+      - run:
+          name: Deploy to Azure Web App
+          command: |
+            az webapp deploy \
+              --name "${AZURE_WEBAPP_NAME}" \
+              --resource-group "${AZURE_RESOURCE_GROUP}" \
+              --type zip \
+              --src-path dist/ \
+              --subscription "${AZURE_SUBSCRIPTION_ID}"
+
+  # ── Publish to GitHub Packages ────────────────────────────────────────────
+  # Triggered only on release tags (v*). Requires GITHUB_TOKEN env var.
+  publish-gpr:
+    executor: node20
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Configure npm for GitHub Packages registry
+          command: |
+            echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" >> ~/.npmrc
+            npm config set registry https://npm.pkg.github.com/
+      - run:
+          name: Publish package to GitHub Packages
+          command: npm publish
+
+# ---------------------------------------------------------------------------
+# Workflows
+# ---------------------------------------------------------------------------
+workflows:
+
+  # ── CI ────────────────────────────────────────────────────────────────────
+  # Runs on every push and pull request.
+  # Fan-out from install: tests, token build, and webpack matrix all run in
+  # parallel, reducing total wall-clock time vs. running them sequentially.
+  ci:
+    jobs:
+      - install
+
+      - test:
+          requires:
+            - install
+
+      - token-build:
+          requires:
+            - install
+
+      # Webpack matrix — three versions run concurrently
+      - webpack-build:
+          name: webpack-node18
+          node-version: "18.20"
+      - webpack-build:
+          name: webpack-node20
+          node-version: "20.18"
+      - webpack-build:
+          name: webpack-node22
+          node-version: "22.11"
+
+  # ── Deploy ────────────────────────────────────────────────────────────────
+  # Runs only on pushes to main. Builds the app after token generation so
+  # the generated CSS variables are baked into the production bundle.
+  deploy:
+    jobs:
+      - install:
+          filters:
+            branches:
+              only: main
+
+      - token-build:
+          requires:
+            - install
+          filters:
+            branches:
+              only: main
+
+      - build-web:
+          requires:
+            - token-build
+          filters:
+            branches:
+              only: main
+
+      - deploy-azure:
+          requires:
+            - build-web
+          filters:
+            branches:
+              only: main
+
+  # ── Publish ───────────────────────────────────────────────────────────────
+  # Runs only when a release tag matching v* is pushed (mirrors the
+  # on: release: types: [created] trigger in npm-publish-github-packages.yml).
+  publish:
+    jobs:
+      - install:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+
+      - test:
+          requires:
+            - install
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+
+      - publish-gpr:
+          requires:
+            - test
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
