@@ -1,0 +1,74 @@
+:root {
+  --color-brand-primary: #6D5EF7;
+  --color-brand-secondary: #19D3DA;
+  --color-brand-accent: #FF4FD8;
+
+  --color-bg-canvas: #FFFFFF;
+  --color-bg-surface: #F8FAFC;
+  --color-bg-surfaceRaised: #F1F5F9;
+
+  --color-text-primary: #020617;
+  --color-text-secondary: #334155;
+  --color-text-inverse: #FFFFFF;
+
+  --color-accent-primary: #6D5EF7;
+  --color-accent-secondary: #19D3DA;
+
+  --color-border-default: #E2E8F0;
+  --color-border-focus: #6D5EF7;
+
+  --color-state-success: #22C55E;
+  --color-state-warning: #F59E0B;
+  --color-state-error: #EF4444;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-pill: 9999px;
+
+  --space-0: 0px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  --type-display-size: 56px;
+  --type-display-line-height: 64px;
+  --type-display-weight: 700;
+
+  --type-headline-size: 40px;
+  --type-headline-line-height: 48px;
+  --type-headline-weight: 700;
+
+  --type-title-size: 28px;
+  --type-title-line-height: 36px;
+  --type-title-weight: 600;
+
+  --type-body-size: 16px;
+  --type-body-line-height: 24px;
+  --type-body-weight: 400;
+
+  --type-label-size: 14px;
+  --type-label-line-height: 20px;
+  --type-label-weight: 600;
+}
+
+[data-theme="dark"] {
+  --color-bg-canvas: #020617;
+  --color-bg-surface: #0F172A;
+  --color-bg-surfaceRaised: #111827;
+
+  --color-text-primary: #F8FAFC;
+  --color-text-secondary: #CBD5E1;
+  --color-text-inverse: #020617;
+
+  --color-border-default: #334155;
+  --color-border-focus: #6D5EF7;
+}
