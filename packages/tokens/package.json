@@ -1,0 +1,13 @@
+{
+  "name": "@ultra-pro/tokens",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.ts",
+    "check": "node check.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}
