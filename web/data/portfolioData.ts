@@ -5,7 +5,12 @@ import type {
   UltraProTestimonialItem,
 } from '../models/ultraProModels';
 
-export const navLabels = ['Home', 'Experience', 'Projects', 'Contact'];
+export const navItems = [
+  { label: 'Home', href: '#home', active: true },
+  { label: 'Experience', href: '#experience' },
+  { label: 'Projects', href: '#projects' },
+  { label: 'Contact', href: '#contact' },
+];
 
 export const heroTitle = 'Android Senior Developer';
 export const heroSubtitle =

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { UltraProButton } from './UltraProButton';
 
 type Props = {
   onSubmit: (data: { name: string; email: string; message: string }) => void;
@@ -42,12 +43,7 @@ export function UltraProContactForm({ onSubmit }: Props) {
         placeholder="Message"
         aria-label="Message"
       />
-      <button
-        type="submit"
-        className="inline-flex items-center justify-center rounded-md bg-[var(--color-accent-primary)] px-5 py-3 text-sm font-semibold text-[var(--color-text-inverse)] focus:outline-none focus:ring-2 focus:ring-[var(--color-border-focus)] focus:ring-offset-2 focus:ring-offset-[var(--color-bg-canvas)]"
-      >
-        Send Message
-      </button>
+      <UltraProButton type="submit">Send Message</UltraProButton>
     </form>
   );
 }
