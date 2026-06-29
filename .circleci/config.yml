@@ -114,7 +114,7 @@ jobs:
           at: ~/project
       - run:
           name: Build design tokens
-          command: node tokens/build.ts
+          command: ./node_modules/.bin/tsx tokens/build.ts
       - verify-token-artifacts
       - store_artifacts:
           path: generated
